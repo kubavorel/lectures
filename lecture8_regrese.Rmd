@@ -1,0 +1,153 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+```{r}
+data(women)
+names(women)
+attach(women)
+with(women, plot(height, weight))
+```
+```{r}
+m1=lm(weight ~ height, data = women)
+m1
+```
+
+```{r}
+plot(m1)
+```
+
+```{r}
+library(olsrr)
+ols_test_normality(m1)
+
+```
+
+# Heteroskedasticita
+
+```{r}
+library(car)
+ncvTest(m1)
+```
+
+```{r}
+library(PoEdata)
+data("cps_small")
+plot(cps_small$educ, cps_small$wage, 
+     xlab="education", ylab="wage")
+```
+
+
+# polynomická regrese
+
+
+```{r}
+m2 = lm(weight ~ height + I(height^2), data = women)
+summary(m2)
+```
+
+```{r}
+plot(m2)
+```
+
+
+# kubický rovnice
+
+```{r}
+m3 = lm(weight ~ height + I(height^2) + I(height^3), data = women)
+summary(m3)
+```
+
+
+# Násobná lineární regrese: data state.x77
+
+
+
+```{r}
+state.x77
+```
+
+
+
+```{r}
+str(state.x77)
+class(state.x77)
+```
+
+
+
+```{r}
+df = as.data.frame(state.x77)
+df = df[,c("Murder", "Frost", "Illiteracy", "Income", "Population")]
+murder_rate = lm(Murder~Frost+Illiteracy+Income+Population, data=df)
+summary(murder_rate) 
+```
+
+```{r}
+Confint(murder_rate, level=0.95)
+```
+```{r}
+cor(df)
+```
+```{r}
+pairs(df)
+```
+```{r}
+vif_murder_rate = vif(murder_rate)
+vif_murder_rate
+```
+
+variance-covariance matrix of parameters
+
+```{r}
+var_cov = vcov(murder_rate)
+round(var_cov, 3)
+```
+Correlation of parameters
+
+```{r}
+cor_par = cov2cor(var_cov)
+round(cor_par, 3)
+```
+```{r}
+qqPlot(murder_rate, main = "Q-Q Plot")
+```
+
+```{r}
+influencePlot(murder_rate)
+```
+```{r}
+pl = plot(murder_rate, which = 5)
+
+```
+
+```{r}
+influencePlot(murder_rate)
+```
+
+# component+residual plots, also called partial-residual plots
+
+
+```{r}
+crPlots(murder_rate)
+```
+
+
+# Interakční efekty
+
+```{r}
+model_mtcar = lm(mpg ~ hp + wt, data = mtcars)
+summary(model_mtcar)
+```
+
+```{r}
+model_mtcar_int = lm(mpg ~ hp + wt + hp:wt, data = mtcars)
+summary(model_mtcar_int)
+```
+
+```{r}
+library(effects)
+plot(allEffects(model_mtcar_int))
+```
+

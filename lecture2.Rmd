@@ -1,0 +1,316 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+load("cesta_k_souboru/soubor.RData")
+
+
+```{r}
+load("c:/projekty/_R_kurz/data/iq.RData")
+iq
+str(iq)
+#hist(iq$obs, freq = F, breaks = seq(-5, 200, 15))
+hist(iq$obs, freq = F, breaks = seq(0, 200, 10))
+curve(dnorm(x, mean = mean(iq$obs), sd = sd(iq$obs)), 
+      col = "red", 
+      lwd = 2, 
+      add = TRUE)
+```
+
+# Odvození pravděpodobnosti
+
+```{r}
+iq$obs
+iqs = sort(iq$obs)
+iqs
+```
+```{r}
+sum(iq$obs>120)/100
+```
+# Simulace hodu hrací kostkou
+
+```{r}
+pocet_hodu = 10000000
+pokusy = sample(c(1:6),pocet_hodu, replace=TRUE) 
+hist(pokusy, 
+     freq = F, 
+     breaks = c(0,1,2,3,4,5,6), 
+     xlab = "Hodnoty hodu kostkou", 
+     ylab = "Pravdepodobnost realizace hodnoty h = x")
+```
+
+
+
+# Normální rozdělení
+
+```{r}
+dnorm(0)
+dnorm(-1)
+```
+# IQ
+
+```{r}
+dnorm(115, 100, 15)
+```
+
+# Zobrazení teoretické normální funkce
+
+```{r}
+s = seq(55,145,1)
+d = dnorm(s, 100, 15)
+plot(s,d, xlab = "IQ", ylab = "p")
+
+# alternativně:
+curve(dnorm(x, mean = 100, sd = 15), xlim = c(50,150))
+```
+
+# Distribuční funkce
+
+```{r}
+pnorm(115, 100, 15)
+pnorm(115, 100, 15, lower.tail = FALSE)
+1 - pnorm(115, 100, 15)
+pnorm(115, 100, 15) - pnorm(85, 100, 15)
+pnorm(145, 100, 15, lower.tail = FALSE)
+```
+
+Zobrazení distribuční funkce v grafu
+
+```{r}
+s = seq(55,145,1)
+p = pnorm(s, 100, 15)
+plot(s,p, xlab = "IQ", ylab = "P")
+# alternativně:
+curve(pnorm(x, mean = 100, sd = 15), xlim = c(50,150))
+```
+
+# Kvantilová funkce
+
+```{r}
+s = seq(0,1,0.01)
+q = qnorm(s, 100, 15)
+plot(s,q, xlab = "P", ylab = "IQ")
+# alternativně:
+curve(qnorm(x, mean = 100, sd = 15))
+```
+
+# Sampling
+
+```{r}
+rnorm(1,100,15)
+#Simulace výběru o velikosti 100
+iq = rnorm(100,100,15)
+#Zobrazení distribuce pomocí histogramu:
+hist(iq, prob = T)
+hist(iq, breaks=20, prob = T)
+iq = rnorm(1000, 100, 15)
+hist(iq, breaks=20, prob = T)
+
+```
+
+# Standardizace normálního rozdělení
+
+```{r}
+par(mfrow = c(1,3))
+hist(iq, breaks=20, prob = T)
+iq_shifted = iq-mean(iq)
+hist(iq_shifted, breaks=20, prob = T)
+iq_scaled = iq_shifted/sd(iq)
+hist(iq_scaled, breaks=20, prob = T)
+```
+
+
+
+# Binomické rozdělení
+
+
+
+
+Example:
+
+
+```{r}
+EAO = 60   # celkový počet EAO
+p = 0.4  # pravděpodobnost využití autobusu na úrovni každého EAO 
+
+rbinom(1, size = EAO, prob = p)
+distribuce_obsazeni = rbinom(100,EAO,p)
+hist(distribuce_obsazeni, prob = T)
+```
+
+
+
+```{r}
+
+
+# Pravděpodobnost přesně 60 cestujících v autobusu
+dbinom(30, n, p)
+```
+
+
+Pravděpodobnosti všech možných obsazeností autobusu
+
+```{r}
+obsazenost = 1:EAO
+p_obsazenost = dbinom(obsazenost, EAO, p)
+barplot(p_obsazenost, names.arg = obsazenost)
+```
+
+
+
+
+
+2. Kumulativní pravděpodobnost
+
+Jaká je pravděpodobnost, že obsazenost autobusu bude 15 a nižší? 
+
+```{r}
+# Kumulativní pravděpodobnost P(X ≤ 30)
+pbinom(20, size = EAO, prob = p)
+```
+
+
+```{r}
+max_obsazenost = 1:EAO
+p_obsazenost = pbinom(max_obsazenost, EAO, p)
+barplot(p_obsazenost, names.arg = max_obsazenost)
+```
+
+```{r}
+1 - pbinom(30, size = EAO, prob = p)
+```
+
+
+
+Příklad:
+Město má z předešlého průzkumu informaci, že 30% obyvatel má park v dostupnosti do 10 minut. Jaká je pravděpodobnost, že z 15 náhodných rezidentů bude 5 rezidentů bydlet v dostupnosti do 10 minut? 
+
+```{r}
+pbinom(5, 15, 0.33)
+```
+Zvýšime vzorek obyvatel z 15 na 150 a úměrně tomu i počet obyvatel, u nichž předpokládáme, že žijí v dostupnosti do 10 min k parku.
+
+```{r}
+pbinom(50, 150, 0.33)
+```
+
+
+# Poisonovo rozdělení
+
+Příklad:
+Jestliže průměrná intenzita provozu na komunikaci je 12 vozidel za minutu, spočítejte pravděpodobnost, že za minutu projede právě 17 automobilů.
+
+```{r}
+dpois(17, lambda=12)
+```
+
+```{r}
+d = dpois(1:30, lambda=12)
+barplot(d, names.arg = 1:30)
+
+```
+
+
+Spočítejte pravděpodobnost, že za minutu projede 17 a více automobilů.
+
+
+```{r}
+ppois(16, lambda=12, lower=FALSE)
+```
+
+Spočítáme pravděpodobnost pro hodnoty 1 až 30 a zobrazíme v grafu:
+
+
+```{r}
+p = ppois(1:30, lambda=12, lower.tail=FALSE)
+barplot(p, names.arg = 1:30)
+
+```
+
+
+
+
+# Geometrické rozdělení
+
+Geometrické rozdělení predikuje počet neúspěšných pokusů před prvním úspěšným pokusem v řadě jednotlivých nezávislých Bernouliho pokusů. V územním plánování lze toto využít pro predikci čekání na opravu nebo predikci selhání infrastruktury.
+
+
+
+Příklad:
+
+Jaká je pravděpodobnost, že při házení korunou hodíme pannu až v pátém hodu?
+
+
+```{r}
+dgeom(4, prob=0.5)
+```
+
+Jaká je pravděpodobnost, že při házení korunou hodíme pannu až v n-tém hodu?
+
+```{r}
+d = dgeom(1:20, prob=0.5)
+barplot(d, names.arg = 1:20)
+
+```
+
+
+
+
+Příklad: pravděpodobnost nehody na křižovatce
+
+Z dostupných statistik o dopravních nehodách víme, že na sledované křižovatce dochází k dopravní nehodně s pravděpodobností 0.1 za měsíc. Jaká je pravděpodobnost, že následující 4 měsíce nenastane žádná dopravní nehoda?
+
+```{r}
+p <- 1/10
+
+dgeom(4, p)
+```
+
+```{r}
+d = dgeom(1:12, prob=p)
+barplot(d, names.arg = 1:12)
+
+```
+Průměrný počet měsíců, do první dopravní nehody je (1-p)/p = 0.9/0.1=9 měsíců
+
+
+
+# Exponenciální rozdělení
+
+Příklad: doba mezi poruchami městského vodovodního systému. 
+
+Průměrný počet vážných poruch ve vodovodní síti města je jedna za 4 měsíce. Chceme odhadnout pravděpodobnost, že další porucha nastane přesně za 1 měsíc.
+
+
+```{r}
+lambda = 1/4
+dexp(1, rate=lambda)
+lambda*exp(-lambda * 1)
+```
+Jaká je pravděpodobnost výskytu další poruchy přesně v prvním, druhém, třetím měsíci atd... 
+
+```{r}
+doba = dexp(1:10, rate=lambda)
+barplot(doba, names.arg = 1:10)
+```
+
+```{r}
+pexp(6, rate=lambda)
+```
+
+```{r}
+doba = pexp(1:10, rate=lambda)
+barplot(doba, names.arg = 1:10)
+```
+
+```{r}
+set.seed(123)  # For reproducibility
+n <- 30  # Sample size per mean
+mu <- 50  # Mean of the normal distribution
+sigma <- 10  # Standard deviation
+
+sample_means = replicate(1000, mean(rnorm(n, mean = mu, sd = sigma)))
+hist(sample_means)
+```
+

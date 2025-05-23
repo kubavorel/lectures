@@ -1,0 +1,107 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+```{r}
+p = seq(0, 1, 0.1)
+p
+n = 15
+se = sqrt((p*(1-p))/n)
+se
+plot(p, se, type = "l")
+```
+
+
+
+# Dva nezávislé výběry
+
+Shodný rozptyl v obou výběrech
+```{r}
+x = c(15,10, 13,7, 9,8, 21,9,14,8)
+y = c(15,14, 12,8,14,7, 16,10,15,12)
+t.test(x, y, alt="less",var.equal=TRUE)
+```
+
+Rozdílný rozptyl v obou výběrech
+
+```{r}
+t.test(x, y, alt="less")
+```
+Příklad:
+Město vyhodnocuje, zda je znečištění vzduchu prachovými částicemi PM2.5 v průmyslové zóně statisticky významně vyšší než je znečištění v zóně bydlení. K analýze je k dispozici vzorek znečištění měřený behem jednoho dne. 
+
+
+
+```{r}
+set.seed(123)  # reprodukovatelnost výpočtu
+
+# Syntetická data znečištění PM2.5
+prumysl = rnorm(30, mean = 35, sd = 8)  # Higher pollution levels
+bydlení = rnorm(30, mean = 30, sd = 7)  # Lower pollution levels
+
+
+
+# Vytvoreni data frame wide
+air_quality_wide = data.frame(prumysl, bydlení)
+# Vytvoreni data frame long
+air_quality_long = stack(air_quality_wide)
+# Změna jmen sloupců tabulky
+names(air_quality_long) = c("PM2.5", "zona")
+
+
+# Sumarizace dat
+summary(air_quality_long)
+boxplot(air_quality_long$PM2.5 ~ air_quality$zona)
+```
+
+```{r}
+t.test(prumysl, bydlení, var.equal = TRUE, alternative = "greater")
+t.test(PM2.5 ~ zona, data = air_quality_long, var.equal = TRUE, alternative = "greater")
+```
+
+
+
+# Párový test
+
+Město realizovalo opatření na snížení hlukové zátěže použitím "tichého" asfaltu. Nyní vyhodnocuje dopady tohoto opatření a vychází z hlukového měření před a po realizaci opatření.
+
+```{r}
+set.seed(123) 
+
+# Simulovaná data hluku
+pred <- rnorm(20, mean = 75, sd = 5)  
+po <- pred - rnorm(20, mean = 3, sd = 2)  
+
+# Vytvoreni data frame
+hluk_data <- data.frame(pred, po)
+boxplot(hluk_data)
+
+summary(hluk_data)
+```
+
+```{r}
+t.test(pred, po, data = hluk_data, alternative = "greater", paired = TRUE)
+```
+
+
+# Proporční test
+
+Město zavedlo výraznou slevu na veřejnou autobusovou dopravu ve své spádové oblasti a zjišťuje, zda podíl lidí, kteří využívají autobusovou dopravou významně vzrostl na úkor zbývajících dopravních módů.
+Před zavedením slevy z 500 dotazovaných lidí 180 využívalo autobus, po zavedení slevy z 600 dotazovaných lidí 250 lidí využívá autobus. 
+Zjistěte, zda nárůst podílu lidí využívajících autobusové dopravy je statisticky významný.
+
+
+```{r}
+# Lidé využívající autobusovou dopravu před a po zavedení slevy 
+uziva_autobus = c(180, 250)
+# Velikost vzorků: počet lidí dotazovaných před a po zavedení slevy 
+vzorek <- c(500, 600)     # Total people surveyed
+# proporční test na dvou vzorcích (two-sample proportion test)
+prop.test(uziva_autobus, vzorek, alternative = "greater", conf.level = 0.95)
+```
+p-hodnota > 0.05, zvýšení podílu uživatelů autobusu je náhodný a zavedená sleva neměla na podíl uživatelů významný vliv.
+
+
+
+

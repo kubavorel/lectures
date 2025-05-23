@@ -1,0 +1,91 @@
+---
+title: "lecture 4"
+output: html_notebook
+---
+
+xxx
+
+```{r}
+n <- 10  # Sample size per mean
+mu <- 100  # Mean of the normal distribution
+sigma <- 15  # Standard deviation
+
+vyberove_prumery = replicate(100, mean(rnorm(n, mean = mu, sd = sigma)))
+hist(vyberove_prumery)
+sd(vyberove_prumery)
+
+```
+
+```{r}
+n = 30
+vyberove_prumery = replicate(100, mean(rexp(n, rate = 1)))
+hist(vyberove_prumery)
+```
+
+```{r}
+standardni.odchylka = 15
+hladina.spolehlivosti = 0.95
+pocet.pozorovani=100
+vyber = rnorm(pocet.pozorovani, 100, 15)
+prumer=mean(vyber)
+smerodatna.chyba = standardni.odchylka/sqrt(pocet.pozorovani)
+cat("Průměr = ", prumer, "\n")
+cat("Smerodatna.chyba = ", smerodatna.chyba, "\n")
+z.skore = qnorm((hladina.spolehlivosti+1)/2)
+cat("z skóre = ", z.skore, "\n")
+meze= c(-z.skore*smerodatna.chyba, z.skore*smerodatna.chyba)
+interval.spolehlivosti = meze + c(prumer, prumer)
+cat("Interval spolehlivosti = ", interval.spolehlivosti, "\n")
+```
+```{r}
+install.packages("BSDA")
+library(BSDA)
+vyber = rnorm(100, 100, 15)
+z.test(vyber, sigma.x=15)
+```
+
+# Studentovo rozdělení
+
+```{r}
+x=seq(-4,4,.01)
+plot(x,dnorm(x),type="l", col="red")
+for(i in c(2,5,10,20,50)) points(x,dt(x,df=i),type="l",lty=i)
+```
+
+# t-rozdělení
+
+```{r}
+standardni.odchylka = 15
+hladina.spolehlivosti = 0.95
+pocet.pozorovani=10
+vyber = rnorm(100, 100, 15)
+prumer=mean(vyber)
+smerodatna.chyba = standardni.odchylka/sqrt(pocet.pozorovani)
+cat("Průměr = ", prumer, "\n")
+cat("smerodatna.chyba = ", smerodatna.chyba, "\n")
+t.skore = qt((hladina.spolehlivosti+1)/2, df=pocet.pozorovani-1)
+cat("t skóre = ", t.skore, "\n")
+meze = c(-t.skore*smerodatna.chyba, t.skore*smerodatna.chyba)
+interval.spolehlivosti.t = meze + c(prumer, prumer)
+cat("Interval spolehlivosti = ", interval.spolehlivosti.t, "\n")
+
+```
+
+```{r}
+vyber = rnorm(100, 100, 15)
+t.test(vyber, conf.level = 0.95)
+```
+
+
+# Interval spolehlivosti pro medián: wilcoxonův test
+
+```{r}
+x = c(110,12,2.5,98,1017,540,54,4.3,150,432)
+hist(x)
+boxplot(x)
+```
+
+```{r}
+wilcox.test(x, conf.int=T)
+```
+

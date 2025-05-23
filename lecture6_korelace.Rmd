@@ -1,0 +1,149 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+```{r}
+vyska = c(187, 170, 180, 184, 178, 180, 172, 176, 186, 177)
+vaha = c(72, 60, 73, 74, 72, 70, 62, 70, 80, 67)
+plot(vyska, vaha)
+```
+
+```{r}
+dvyska = vyska-mean(vyska)
+cat("dvyska", dvyska)
+dvaha = vaha-mean(vaha)
+cat("dvaha", dvaha)
+covariance = sum(dvyska*dvaha)/9
+cat("covariance", covariance)
+corelace = cov(vyska, vaha)/(sd(vyska)*sd(vaha))
+cat("corelace", corelace)
+```
+
+```{r}
+cov(vyska, vaha)
+cor.test(vyska, vaha)
+
+```
+
+Spearmanův korelační koeficient pořadí
+
+```{r}
+rvaha = rank(vaha)
+rvyska = rank(vyska)
+vaha
+rvaha
+vyska
+rvyska
+D = rvaha-rvyska
+D
+D2 = D^2
+sum(D2)
+spearman = 1-(6*sum(D2)/(10*(10^2-1)))
+spearman
+```
+```{r}
+cor.test(rank(vyska), rank(vaha))
+```
+
+
+# Parciální korelace
+
+```{r}
+library(ppcor)
+```
+
+
+
+```{r}
+vek = c(47, 35, 32, 28, 44, 75, 47, 41, 25, 24, 52, 50, 32, 53, 48, 27, 54, 50, 34, 36)
+prijem = c(28, 56, 65, 24, 95, 125, 152, 32, 21, 45, 165, 50, 41, 36, 78, 86, 49, 99, 19, 35)
+PC = c(5, 14, 8, 10, 16, 18, 9, 11, 5, 8, 19, 8, 9, 11, 12, 15, 16, 14, 4, 5)
+
+data = data.frame(vek, prijem, PC)
+cor(data)
+pcor(data)
+
+```
+
+
+# Test dobré shody: příklad 1
+
+```{r}
+probs = rep(1/6, 6)
+probs
+obs= sample(1:6, 100, p=c(.5,.5,1,1,1,2)/6, replace=T)
+obs
+tab.obs = table(obs)
+tab.obs
+barplot(tab.obs)
+chisq.test(tab.obs, p=probs)
+```
+
+# Test dobré shody: příklad 2
+
+```{r}
+x = c(100,110,80,55,14)
+probs= c(29,21,17,17,16)/100
+chisq.test(x,p=probs)
+```
+
+# Test nezávislosti
+
+```{r}
+pas.ano=c(12813, 647, 359, 42)
+pas.ne=c(65963, 4000, 2642, 303)
+d = data.frame(pas.ano, pas.ne)
+row.names(d) = c("zadne", "lehke", "stredni", "tezke")
+d
+t(d)
+chisq.test(d)
+library(lsr)
+cramersV(d)
+```
+
+
+# test nazávislosti: příklad 2: 
+
+
+
+# test homogenity
+
+```{r}
+bp = c(12, 69, 75, 24, 22)
+hp = c(34, 55, 61, 24, 28)
+wp = c(22, 81, 60, 24, 14)
+tab = rbind(bp, hp, wp)
+tab
+chisq.test(tab)
+cramersV(tab)
+
+```
+
+# Samostatná práce 1
+
+```{r}
+predpoklad = c(25, 50, 25)/100
+predpoklad
+pozorovani = c(65, 152, 67)
+chisq.test(pozorovani,p=predpoklad)
+```
+
+# Samostatná práce 2
+
+```{r}
+A = c(31, 49, 18, 2)
+B = c(11, 59, 26, 4)
+C = c(12, 51, 31, 6)
+
+data = data.frame(A, B, C)
+rownames(data) = c("chudi", "nizsi", "stredni", "bohati")
+data
+```
+
+
+```{r}
+chisq.test(data)
+cramersV(data)
+```
+

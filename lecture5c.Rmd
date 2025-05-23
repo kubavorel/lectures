@@ -1,0 +1,87 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+# test of normality
+
+# QQ plot
+
+```{r}
+# nahrajte knihovnu ggplot2 a car
+library(ggplot2)
+library(car)
+# generování normální distribuce 
+set.seed(123)
+normal = rnorm(1000)
+hist(normal, freq = F, breaks = 20)
+curve(dnorm(x, mean = mean(0), sd = 1), add = TRUE, col = "red", lwd = 2)
+# Create Q-Q plot with confidence interval
+qqPlot(normal, distribution = "norm", envelope = 0.95)
+```
+
+
+# distribuce s tenkým ocasem (Platykurtic)
+
+
+```{r}
+uniform = runif(1000, min = -1, max = 1)
+hist(uniform, freq = F, breaks = 20, xlim = c(-5, 5))
+curve(dnorm(x, mean = mean(0), sd = 1), add = TRUE, col = "red", lwd = 2)
+qqPlot(uniform, distribution = "norm", envelope = 0.95)
+```
+
+
+
+
+
+# Distribuce s tlustým ocasem (Leptokurtic)
+
+# t-student
+
+```{r}
+t_stud <- rt(1000, df = 2)
+hist(t_stud, freq = F, breaks = 200, xlim = c(-5, 5), ylim = c(0, 0.4))
+curve(dnorm(x, mean = mean(0), sd = 1), add = TRUE, col = "red", lwd = 2)
+qqPlot(t_stud, distribution = "norm", envelope = 0.95)
+```
+
+
+
+
+# distribuce sklonitá doleva
+# exponenciální rozdělení
+
+```{r}
+xexp = rexp(1000)
+hist(xexp, freq = F, breaks = 20)
+curve(dnorm(x, mean = mean(1), sd = 1), add = TRUE, col = "red", lwd = 2)
+qqPlot(xexp, distribution = "norm", envelope = 0.95)
+```
+
+
+
+
+# distribuce sklonitá doleva 
+
+```{r}
+xexp2 = max(xexp)-xexp
+hist(xexp2, freq = F, breaks = 20)
+curve(dnorm(x, mean = mean(1), sd = 1), add = TRUE, col = "red", lwd = 2)
+qqPlot(xexp2, distribution = "norm", envelope = 0.95)
+```
+
+
+# Shapiro-Wilkonsonův test
+
+```{r}
+shapiro.test(normal)
+shapiro.test(uniform)
+shapiro.test(t_stud)
+shapiro.test(xexp)
+shapiro.test(xexp2)
+
+```
+
+
+

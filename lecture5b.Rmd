@@ -1,0 +1,122 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+```{r}
+x = c(15,10, 13,7, 9,8, 21,9,14,8)
+y = c(15,14, 12,8,14,7, 16,10,15,12)
+t.test(x, y, alt="less",var.equal=TRUE)
+
+```
+```{r}
+t.test(x, y, alt="less", var.equal=FALSE)
+
+```
+
+# Příklad 2
+
+Město vyhodnocuje, zda je znečištění vzduchu prachovými částicemi PM 2.5 v průmyslové zóně statisticky významně vyšší než je znečištění v zóně bydlení. K analýze je k dispozici vzorek znečištění měřený v průběhu jednoho dne. 
+
+
+```{r}
+set.seed(123)
+prumysl = rnorm(30, mean = 35, sd = 8)
+bydlení = rnorm(30, mean = 30, sd = 7)
+air_quality_wide = data.frame(prumysl, bydlení)
+air_quality_long = stack(air_quality_wide)
+names(air_quality_long) = c("PM2.5", "zona")
+summary(air_quality_long)
+boxplot(air_quality_long$PM2.5 ~ air_quality$zona)
+
+```
+
+```{r}
+t.test(PM2.5 ~ zona, data = air_quality_long, var.equal = TRUE, alternative = "greater")
+```
+
+# Příklad 3
+
+Město realizovalo opatření na snížení hlukové zátěže použitím "tichého" asfaltu. Nyní vyhodnocuje dopady tohoto opatření a vychází z hlukového měření před a po realizaci opatření.
+
+
+```{r}
+set.seed(123)
+pred = rnorm(20, mean = 75, sd = 5)
+po = pred - rnorm(20, mean = 3, sd = 2) 
+hluk_data = data.frame(pred, po)
+boxplot(hluk_data)
+summary(hluk_data)
+
+```
+
+
+```{r}
+t.test(hluk_data$pred, hluk_data$po, alternative = "greater", paired = TRUE)
+```
+
+
+
+# Příklad 
+
+```{r}
+library(UsingR)
+data(homework)
+homework
+```
+
+```{r}
+homework_stacked = stack(homework)
+names(homework_stacked) = c("skore", "skola")
+t.test(skore ~ skola, data = homework_stacked)
+```
+
+
+# Příklad
+
+Dvanáct zemědělských pozemků bylo rozděleno na poloviny a jedna polovina vždy osázena standardním obilím Standard a druhá geneticky upraveným New. Zvolte vhodný test pro prokázání nulové hypotézy, že se výnosnost pozemků osázena standardním obilím se statisticky významně liší od pozemků osázených geneticky upraveným obilím. 
+Data najdete v datasetu corn v balíčku UsingR. 
+
+```{r}
+data(corn)
+corn
+```
+
+```{r}
+t.test(corn$New, corn$Standard, alternative = "greater", paired = T)
+```
+
+
+
+
+# Testování podílu
+
+## Příklad 1
+
+Město zavedlo výraznou slevu na veřejnou autobusovou dopravu ve své spádové oblasti a zjišťuje, zda podíl lidí, kteří využívají autobusovou dopravou významně vzrostl na úkor zbývajících dopravních módů. Před zavedením slevy z 500 dotazovaných lidí 180 využívalo autobus, po zavedení slevy z 600 dotazovaných lidí 250 lidí využívá autobus. Zjistěte, zda nárůst podílu lidí využívajících autobusové dopravy je statisticky významný.
+
+
+```{r}
+uziva_autobus = c(180, 250)
+vzorek <- c(500, 600)
+prop.test(uziva_autobus, vzorek, alternative = "greater", conf.level = 0.95)
+```
+
+## Příklad 2
+
+V případě sociologických šetření je nutné prověřovat, zda jsou rovnoměrně zastoupeny jednotlivé sociální skupiny. Zde budeme prověřovat, zda se zastoupení pohlaví v jednotlivých etnických skupinách statisticky významně odlišuje (alternativní hypotéza). 
+
+
+```{r}
+library(MASS)
+data(quine)
+quine
+```
+
+```{r}
+table(quine$Eth, quine$Sex) 
+```
+```{r}
+prop.test(table(quine$Eth, quine$Sex), correct=FALSE) 
+```
+

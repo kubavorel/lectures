@@ -1,0 +1,208 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+
+
+# Sloupcový graf
+
+
+```{r}
+table(Cars93$Type)
+# to je něco zajímavého
+barplot(table(Cars93$Type), xlab = "Typ", ylab = "Četnost", main = "Četnost typů aut na trhu USA v roce 1993")
+```
+
+Koláčový graf
+
+```{r}
+tab = table(Cars93$Type)
+pie(tab, labels = names(tab))
+pie(tab, labels = tab)
+pie(tab, labels = paste(names(tab), tab))
+barvy <- c("white", "red", "violet", "blue", "green", "purple")
+nadpis = "Počet válců"
+pie(tab, labels = paste(names(tab), tab), main = "Počet válců", col = barvy)
+```
+
+# Histogram
+
+```{r}
+data(Cars93)
+attach(Cars93)
+hist(Luggage.room)
+hist(Luggage.room, freq = F)
+hist(Luggage.room, freq = F, breaks = 15)
+hist(Price, freq = F, breaks = 15)
+hist(Weight, freq = F, breaks = 15)
+hist(Weight, freq = F, breaks = 25)
+```
+
+# Aritmetický průměr
+
+```{r}
+summary(Luggage.room)
+```
+
+# Citlivost průměru na odlehlé hodnoty
+
+```{r}
+Luggage.room.outlier = Luggage.room
+Cars93[82,]
+Luggage.room.outlier[82] = 50
+hist(Luggage.room.outlier)
+summary(Luggage.room.outlier)
+```
+# Zvýšení resistence aritmetického průměru na odlehlé hodnoty
+
+```{r}
+mean(Luggage.room, na.rm = T)
+mean(Luggage.room.outlier, na.rm = T)
+mean(Luggage.room.outlier, trim=1/10, na.rm = T)
+
+```
+
+# Medián
+
+```{r}
+median(Luggage.room.outlier, na.rm = T)
+median(Luggage.room, na.rm = T)
+```
+# Střední hodnoty různých rozdělení
+
+```{r}
+exponencialni = rexp(1000, rate = 1)
+hist(exponencialni)
+normalni = rnorm(1000, 1)
+hist(normalni)
+df_rozdeleni = data.frame(exponencialni, normalni)
+summary(df_rozdeleni)
+```
+
+# Modus
+
+```{r}
+table(Type)
+sort(table(Type))
+```
+```{r}
+barplot(table(Type))
+```
+
+
+# Rozptyl
+
+```{r}
+var(Price)
+```
+
+# Standardní odchylka
+
+```{r}
+sqrt(var(Price))
+sd(Price)
+summary(Price)
+```
+
+# Kvantily
+
+```{r}
+quantile(Price)
+quantile(Price, c(0.25, 0.75))
+quantile(Price, c(0.5))
+median(Price)
+
+```
+
+# Interquartilové rozpětí
+
+```{r}
+sd(Luggage.room, na.rm = T)
+sd(Luggage.room.outlier, na.rm = T)
+IQR(Luggage.room, na.rm = T)
+IQR(Luggage.room.outlier, na.rm = T)
+
+```
+
+
+```{r}
+# Seřazený vektor cen
+ceny = sort(Cars93$Price)
+barplot(ceny)
+# Výpočet průměru dat
+prumer = mean(ceny)
+# Výpočet odchylek od průměru
+odchylky = ceny - prumer
+odchylky
+barplot(odchylky)
+# Kvadratické odchylky
+kvadrat_odchylky = odchylky^2
+barplot(kvadrat_odchylky)
+# Součet kvadratických odchylek
+sum_kvadrat_odchylky = sum(kvadrat_odchylky)
+# Výpočet rozptylu (variability) dat
+rozptyl = sum_kvadrat_odchylky/(length(ceny)-1)
+rozptyl
+var(ceny)
+
+```
+
+
+# Krabicový graf
+
+```{r}
+boxplot(Luggage.room)
+boxplot(Luggage.room ~ Type)
+```
+
+```{r}
+mad(Luggage.room, na.rm = T)
+mad(Luggage.room.outlier, na.rm = T)
+sd(Luggage.room, na.rm = T)
+sd(Luggage.room.outlier, na.rm = T)
+
+```
+
+# Šikmost
+
+```{r}
+hist(EngineSize)
+#install.packages("moments")
+library(moments)
+skewness(EngineSize)
+```
+
+
+# kurtosis
+
+```{r}
+kurtosis(EngineSize)
+```
+
+```{r}
+# Load necessary libraries
+install.packages("UsingR")
+install.packages("ggplot2")
+
+library(UsingR)
+library(ggplot2)
+
+# Load the dataset
+data(Cars93)
+
+# Extract the Luggage.room variable
+luggage_room <- Cars93$Luggage.room
+
+# Plot the histogram, density curve, and normal curve
+ggplot(data.frame(luggage_room), aes(x = luggage_room)) +
+  geom_histogram(aes(y = ..density..), binwidth = 2, fill = "lightblue", color = "black") +
+  geom_density(color = "blue", linewidth = 1) +
+  stat_function(fun = dnorm, args = list(mean = mean(luggage_room, na.rm = TRUE), 
+                                         sd = sd(luggage_room, na.rm = TRUE)), 
+                color = "red", linetype = "dashed", linewidth = 1) +
+  labs(title = "Luggage Room Distribution with Density and Normal Curve",
+       x = "Luggage Room (cubic feet)", y = "Density") +
+  theme_minimal()
+```
+

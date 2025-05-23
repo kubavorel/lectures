@@ -1,0 +1,197 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+t-test porovnává dva vzorky dat mezi s sebou a vyhodnocuje, zda jsou statisticky významně odlišné.
+
+ANOVA je založena na F-statistice, která porovnává velikost systematické variance (variance vysvětlená modelem) vůči nesystematické varianci (chybě).Porovnává to, jak je model dobrý proti tomu, jak je špatný.
+
+ANOVA je omnibus testem, testuje, zda je rozdíl mezi některými ze vzorků, ale neukazuje, mezi kterými.
+
+Statisticky signifikantní F-statistika nám říká, že model se skupinovými průměry je lepší nežli model s jediným průměrem.
+
+ANOVA je regresním modelem s kategoriálními proměnnými. Koeficienty regrese nepředstavují sklon regresních přímek, ale rozdíly mezi skupinovými průměry. Pokud jsou tyto rozdíly dostatečně velké, potom je takový model lepší, nežli ten, který rozdíly ignoruje a rpresentuje pouze celkový průměr.
+
+
+
+
+# Příklad 1
+
+
+```{r}
+x = c(4,3,4,5,2,3,4,5)
+y = c(4,4,5,5,4,5,4,4)
+z = c(3,4,2,4,5,5,4,4)
+hodnoceni = data.frame(x,y,z)
+hodnoceni
+```
+
+```{r}
+hodnoceni_stacked = stack(hodnoceni)
+hodnoceni_stacked
+plot(values ~ ind, data = hodnoceni_stacked)
+```
+
+```{r}
+model = aov(values~ind, hodnoceni_stacked)
+summary(model)
+```
+
+
+
+
+# ANOVA with contrasts
+
+
+Imagine we are studying the effect of different urban design strategies on walkability scores (Walk Score), které hodnotí veřejné prostory na stupnici 100 (nejlepší) a 0 (nejhorší). We have three groups:
+
+Urbanisté zkoumají efekt různých typů intervencí na zvýšení atraktivity uličních prostranství pro chodce. Pro hodnocení využívají walkability scores (Walk Score), které hodnotí veřejné prostory na stupnici 100 (nejlepší) a 0 (nejhorší). Vzorek tvoří 10 ulic v každé skupině intervencí:
+ulice bez intervence
+Zlepšení zelené infrastruktury
+oživení parteru ulice (smíšené využití)
+
+Baseline (No intervention)
+Green Infrastructure Improvements
+Mixed-Use Development
+We want to test:
+
+Contrast 1: Whether urban interventions (Groups 2 & 3) differ from the baseline (Group 1).
+Contrast 2: Whether Green Infrastructure (Group 2) differs from Mixed-Use Development (Group 3).
+
+
+```{r}
+# Vytvoření datasetu
+set.seed(1234)
+ulice <- data.frame(
+  intervence = factor(rep(c("bezintervence", "zelen", "parter"), each = 10)),
+  hodnoceni = c(rnorm(10, mean = 50, sd = 5),  
+                        rnorm(10, mean = 60, sd = 5),  
+                        rnorm(10, mean = 65, sd = 5))  
+)
+
+# View the first few rows
+head(ulice)
+```
+
+Running ANOVA
+
+```{r}
+# Run ANOVA model
+anova_model = aov(hodnoceni ~ intervence, data = ulice)
+
+# Summary of ANOVA
+summary(anova_model)
+```
+
+
+
+ANOVA is significant, therefore we proceed with planned contrasts.
+
+
+
+
+```{r}
+contrast = matrix(c(-2, 1, 1), ncol = 1)
+rownames(contrast) = levels(ulice$intervence)
+contrasts(ulice$intervence) = contrast
+contrasts_m <- aov(hodnoceni ~ intervence, data = ulice)
+summary(contrasts_m)
+```
+
+```{r}
+contrast = matrix(c(0, -1, 1), ncol = 1)
+rownames(contrast) = levels(ulice$intervence)
+contrasts(ulice$intervence) = contrast
+contrasts_m = aov(hodnoceni ~ intervence, data = ulice)
+summary.lm(contrasts_m)
+```
+
+
+```{r}
+library(multcomp)
+model_full <- lm(hodnoceni ~ intervence, data = ulice)
+summary(glht(model_full, linfct = mcp(intervence = contr_matrix)))
+```
+
+
+
+
+
+Define contrasts
+
+We define two contrasts:
+
+C1: Compare Baseline (Group 1) vs. Urban Interventions (Groups 2 & 3).
+C2: Compare Green Infrastructure (Group 2) vs. Mixed-Use Development (Group 3).
+
+```{r}
+# Set contrasts manually
+contrasts(ulice$intervence) = matrix(c(
+  -2, 1, 1,   # C1: Baseline (-2) vs. Green (+1) & Mixed-Use (+1)
+   0, -1, 1    # C2: Green (-1) vs. Mixed-Use (+1)
+), ncol = 2)
+
+# Run ANOVA again with contrasts
+contrasts_model <- aov(hodnoceni ~ intervence, data = ulice)
+
+# Perform summary with contrasts
+summary(contrasts_model)
+```
+The first contrast (C1) tells us if urban interventions as a whole improve walkability over the baseline.
+The second contrast (C2) tests if there is a difference between Green Infrastructure and Mixed-Use Development.
+
+
+
+Post-hoc Tests for Detailed Comparisons
+
+Since we performed planned contrasts, additional pairwise comparisons can help confirm differences between urban design strategies. We will use Tukey’s HSD test and pairwise t-tests with Bonferroni correction.
+
+
+1. Tukey’s Honest Significant Difference (HSD) Test
+Tukey’s HSD controls for multiple comparisons while identifying which groups differ significantly.
+
+```{r}
+# Perform Tukey's HSD test
+tukey_result <- TukeyHSD(anova_model)
+
+# Print the results
+print(tukey_result)
+
+# Visualizing the Tukey results
+plot(tukey_result, las = 2)  # las=2 rotates axis labels for better readability
+```
+
+
+2. Pairwise Comparisons with Bonferroni Correction
+Another option is to conduct pairwise t-tests with the Bonferroni correction to adjust for multiple comparisons.
+
+```{r}
+# pairwise t-tests s Bonferroni korekcí:
+pairwise_results <- pairwise.t.test(ulice$hodnoceni, 
+                                    ulice$intervence, 
+                                    p.adjust.method = "bonferroni")
+print(pairwise_results)
+```
+
+```{r}
+# 1. Sample data
+scores <- c(78, 82, 80, 74, 75, 76, 68, 72, 70)
+group <- factor(rep(c("A", "B", "C"), each = 3))
+data <- data.frame(scores, group)
+
+# 2. Define the contrast: A vs (B+C)/2
+# A = 1, B = -0.5, C = -0.5
+contrast <- matrix(c(1, -0.5, -0.5), nrow = 1)
+colnames(contrast) <- levels(group)
+contrasts(data$group) <- t(contrast)
+
+# 3. Run ANOVA using aov()
+model <- aov(scores ~ group, data = data)
+
+# 4. Output summary
+summary(model)
+```
+
+
+
