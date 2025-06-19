@@ -15,7 +15,7 @@ table(Cars93$Type)
 barplot(table(Cars93$Type), xlab = "Typ", ylab = "Četnost", main = "Četnost typů aut na trhu USA v roce 1993")
 ```
 
-Koláčový graf
+# Koláčový graf
 
 ```{r}
 tab = table(Cars93$Type)
