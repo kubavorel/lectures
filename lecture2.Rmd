@@ -5,6 +5,7 @@ output: html_notebook
 
 load("cesta_k_souboru/soubor.RData")
 
+dddd
 
 ```{r}
 load("c:/projekty/_R_kurz/data/iq.RData")
