@@ -3,7 +3,7 @@ title: "lecture 4"
 output: html_notebook
 ---
 
-xxx
+xxxx
 
 ```{r}
 n <- 10  # Sample size per mean
